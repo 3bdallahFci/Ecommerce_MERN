@@ -115,6 +115,63 @@ app.post("/user/login", async (req, res) => {
 });
 
 
+
+// handling products section
+
+
+// products database setup
+
+interface Iproduct extends Document{
+    title:string,
+    image:string,
+    stock:number,
+    price:number
+}
+
+
+const productSchema = new Schema<Iproduct>({
+    title:{type:String , required: true},
+    image:{type:String , required: true},
+    price:{type:Number , required: true},
+    stock:{type:Number , required: true}
+})
+
+
+const productModel = mongoose.model<Iproduct>("products",productSchema);
+
+
+// products services
+
+const getAllProducts = async() => {
+  return await productModel.find()
+}
+
+const seedInitialProducts = async() => {
+  const products = [{title:"Mouse Gaming",image:"https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcS59EH7599Q8a2wSKEv61w2jBYYXMl5S_6-10GTHF6Cx-RWEh099kCNyh1fzvUA4vHnF81FfcSXgNkY4V2a2nylAeA8aGH-ixy3cAqHrka3etyqXOF7m0-rWYkFJ9hXOOVjQvr9yOs&usqp=CAc",price:2000,stock:10}]
+
+  const existingProducts = await getAllProducts();
+  if(existingProducts.length === 0)
+    await productModel.insertMany(products)
+};
+
+// seeding products in database for one time only
+seedInitialProducts()
+
+
+
+// products router handlers
+
+app.get("/product",async(req,res) => {
+
+  try {
+    const products = await getAllProducts()
+    res.status(200).send(products)
+  } catch (error) {
+    res.send({"Error" : error}).status(400)
+  }
+})
+
+
 app.listen(port, () => {
   console.log(`server is running at: http://localhost:${port}`);
 });
