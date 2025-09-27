@@ -2,7 +2,7 @@ import mongoose,{Document,Schema} from "mongoose";
 
 
 
-interface Iproduct extends Document{
+export interface Iproduct extends Document{
     title:string,
     image:string,
     stock:string,
