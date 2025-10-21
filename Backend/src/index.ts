@@ -7,12 +7,14 @@ import express, {
 import mongoose, { Document, Schema, type ObjectId } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import cors from "cors"
 // import userRoute from "../src/routes/userRoute.js";
 
 dotenv.config();
 const app = express();
 const port = 3001;
 app.use(express.json());
+app.use(cors())
 
 // JWT middleware
 
@@ -20,7 +22,11 @@ export interface ExtendRequest extends Request {
   user?: any;
 }
 
-export const validateJWT = (req: ExtendRequest, res: Response, next: NextFunction) => {
+export const validateJWT = (
+  req: ExtendRequest,
+  res: Response,
+  next: NextFunction
+) => {
   const authorizationHeader = req.get("authorization");
   if (!authorizationHeader) {
     return res.send("authorization header not found").status(403);
@@ -107,7 +113,7 @@ const register = async ({
     const jwtToken = jwtGenerate({ firstName, email, lastName });
     return { data: jwtToken, statusCode: 200 };
   } catch (error) {
-    return { data: "Registration failed", statusCode: 500 };
+    return { data: `Registration failed : ${error}`  , statusCode: 500 };
   }
 };
 
@@ -146,6 +152,7 @@ const jwtGenerate = (data: any) => {
 
 app.post("/user/register", async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
+  console.log(password);
   const { statusCode, data } = await register({
     firstName,
     lastName,
@@ -153,7 +160,7 @@ app.post("/user/register", async (req, res) => {
     password,
   });
 
-  res.status(statusCode).send(data);
+  res.status(statusCode).json(data);
 });
 
 app.post("/user/login", async (req, res) => {
@@ -161,7 +168,7 @@ app.post("/user/login", async (req, res) => {
 
   const { data, statusCode } = await login({ email, password });
 
-  res.status(statusCode).send(data);
+  res.status(statusCode).json(data);
 });
 
 // handling products section
@@ -197,6 +204,20 @@ export const getAllProducts = async () => {
 const seedInitialProducts = async () => {
   try {
     const products = [
+      {
+        title: "HP VICTUS 15",
+        image:
+          "https://egyptlaptop.com/images/detailed/68/Hp-Victus-15-fa1051ne-Gaming-Laptop.webp",
+        price: 2000,
+        stock: 10,
+      },
+      {
+        title: "iphone 12 pro max",
+        image:
+          "https://cdn.shortpixel.ai/spai/q_glossy+ret_img+to_webp/mobizil.com/wp-content/uploads/2020/10/Apple-iPhone-12-Pro-Max.jpg",
+        price: 2000,
+        stock: 10,
+      },
       {
         title: "Mouse Gaming",
         image:
