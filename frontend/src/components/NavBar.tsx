@@ -19,7 +19,7 @@ const settings = ["My orders", "Logout"];
 
 function NavBar() {
   const navigate = useNavigate();
-  const { username, isAuth } = useAuth();
+  const { username, isAuth ,logout} = useAuth();
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
     null
   );
@@ -33,6 +33,12 @@ function NavBar() {
   };
 
   const handleLogin = () => {navigate("/login")};
+
+  const handleLogout = () => {
+    logout()
+    navigate("/")
+    handleCloseUserMenu
+  }
 
   return (
     <AppBar position="static" elevation={0} className="navbar">
@@ -110,13 +116,16 @@ function NavBar() {
                     open={Boolean(anchorElUser)}
                     onClose={handleCloseUserMenu}
                   >
-                    {settings.map((setting) => (
-                      <MenuItem key={setting} onClick={handleCloseUserMenu}>
+                    <MenuItem  onClick={handleCloseUserMenu}>
                         <Typography sx={{ textAlign: "center" }}>
-                          {setting}
+                          My orders
                         </Typography>
                       </MenuItem>
-                    ))}
+                      <MenuItem  onClick={handleLogout}>
+                        <Typography sx={{ textAlign: "center" }}>
+                          Logout
+                        </Typography>
+                      </MenuItem>
                   </Menu>
                 </Box>
               </>

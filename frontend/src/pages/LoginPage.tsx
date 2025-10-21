@@ -43,6 +43,7 @@ const LoginPage = () => {
       setError(error || "LOGIN failed");
     }
   };
+
   return (
     <Container>
       <Box
@@ -80,6 +81,10 @@ const LoginPage = () => {
           <TextField label="password" name="password" fullWidth inputRef={passwordRef}/>
           <Button variant="contained" fullWidth onClick={onsubmit} sx={{backgroundColor:"#cfa4ff"}}>
             Login
+          </Button>
+          <Typography>if you dont have an Account register from here</Typography>
+          <Button variant="contained" fullWidth onClick={() => navigate("/register")} sx={{backgroundColor:"#cfa4ff"}}>
+            Register
           </Button>
           {error && (
             <div
