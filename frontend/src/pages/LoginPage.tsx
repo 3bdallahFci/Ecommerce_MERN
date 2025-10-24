@@ -83,7 +83,7 @@ const LoginPage = () => {
             Login
           </Button>
           <Typography>if you dont have an Account register from here</Typography>
-          <Button variant="contained" fullWidth onClick={() => navigate("/register")} sx={{backgroundColor:"#cfa4ff"}}>
+          <Button variant="contained" fullWidth onClick={() => navigate("register")} sx={{backgroundColor:"#cfa4ff"}}>
             Register
           </Button>
           {error && (

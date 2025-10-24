@@ -28,7 +28,7 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
   const isAuth = !!token;
 
   return (
-    <AuthContext.Provider value={{ username, token, login, isAuth, logout }}>
+    <AuthContext.Provider value={{ username, token, login, isAuth,logout }}>
       {children}
     </AuthContext.Provider>
   );
