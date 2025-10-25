@@ -7,14 +7,14 @@ import express, {
 import mongoose, { Document, Schema, type ObjectId } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import cors from "cors"
+import cors from "cors";
 // import userRoute from "../src/routes/userRoute.js";
 
 dotenv.config();
 const app = express();
 const port = 3001;
 app.use(express.json());
-app.use(cors())
+app.use(cors());
 
 // JWT middleware
 
@@ -113,7 +113,7 @@ const register = async ({
     const jwtToken = jwtGenerate({ firstName, email, lastName });
     return { data: jwtToken, statusCode: 200 };
   } catch (error) {
-    return { data: `Registration failed : ${error}`  , statusCode: 500 };
+    return { data: `Registration failed : ${error}`, statusCode: 500 };
   }
 };
 
@@ -299,14 +299,28 @@ const createCartForUser = async ({ userId }: createCartForUser) => {
 
 interface getActiveCartForUser {
   userId: string;
+  populateProduct?: boolean;
 }
 
-const getActiveCartForUser = async ({ userId }: getActiveCartForUser) => {
+const getActiveCartForUser = async ({
+  userId,
+  populateProduct,
+}: getActiveCartForUser) => {
   try {
-    let cart = await cartModel.findOne({
-      userId,
-      status: "active",
-    });
+    let cart;
+    if (populateProduct) {
+      cart = await cartModel
+        .findOne({
+          userId,
+          status: "active",
+        })
+        .populate("items.product");
+    } else {
+      cart = await cartModel.findOne({
+        userId,
+        status: "active",
+      });
+    }
     if (!cart) {
       cart = await createCartForUser({ userId });
     }
@@ -349,8 +363,8 @@ const addItemtoCart = async ({
       quantity,
     });
     cart.totalAmount += product.price * quantity;
-    const updatedCart = await cart.save();
-    return { data: updatedCart, statusCode: 201 };
+    await cart.save();
+    return { data: await getActiveCartForUser({userId,populateProduct:true}), statusCode: 201 };
   } catch (error) {
     return { data: "Failed to add item to cart", statusCode: 500 };
   }
@@ -388,8 +402,8 @@ const updateItemsInCart = async ({
       (sum, i) => sum + i.unitPrice * i.quantity,
       0
     );
-    const updatedCart = await cart.save();
-    return { data: updatedCart, statusCode: 201 };
+    await cart.save();
+    return { data: await getActiveCartForUser({userId,populateProduct:true}), statusCode: 201 };
   } catch (error) {
     return { data: "Failed to update cart", statusCode: 500 };
   }
@@ -419,7 +433,7 @@ const deleteItemFromCart = async ({
       0
     );
     await cart.save();
-    return { data: cart, statusCode: 200 };
+    return { data: await getActiveCartForUser({userId,populateProduct:true}), statusCode: 200 };
   } catch (error) {
     return { data: "Failed to delete item from cart", statusCode: 500 };
   }
@@ -436,7 +450,7 @@ const clearCart = async ({ userId }: clearCart) => {
     cart.items = [];
     cart.totalAmount = 0;
     await cart.save();
-    return { data: cart, statusCode: 200 };
+    return { data: await getActiveCartForUser({userId,populateProduct:true}), statusCode: 200 };
   } catch (error) {
     return { data: "Failed to clear cart", statusCode: 500 };
   }
@@ -448,6 +462,7 @@ app.get("/cart", validateJWT, async (req: ExtendRequest, res) => {
     const userId = req.user._id;
     const cart = await getActiveCartForUser({
       userId,
+      populateProduct: true,
     });
     res.status(200).send(cart);
   } catch (error) {

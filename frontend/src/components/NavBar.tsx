@@ -16,10 +16,12 @@ import { Badge, Button } from "@mui/material";
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { useNavigate } from "react-router";
 import ShoppingCart from "@mui/icons-material/ShoppingCart";
+import { useCart } from "../Context/CartContext";
 
 const settings = ["My orders", "Logout"];
 
 function NavBar() {
+  const {CartItem} = useCart()
   const navigate = useNavigate();
   const { username, isAuth, logout } = useAuth();
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(
@@ -57,6 +59,7 @@ function NavBar() {
               width: "100%",
             }}
           >
+            <Button variant="outlined" onClick={() => navigate("/")} sx={{color: "#fff"}} style={{textTransform:"lowercase"}}>
             <Box
               sx={{
                 display: "flex",
@@ -66,7 +69,7 @@ function NavBar() {
               }}
               width={200}
             >
-              <AdbIcon sx={{ display: "flex" }} className="logo" />
+              <AdbIcon sx={{ display: "flex" }} className="logo"  />
               <Typography
                 variant="h4"
                 noWrap
@@ -77,11 +80,11 @@ function NavBar() {
                   fontFamily: "monospace",
                   textDecoration: "none",
                 }}
-                className="profile"
               >
                 3bdallah
               </Typography>
             </Box>
+            </Button>
             <Box
               display={"flex"}
               flexDirection={"row"}
@@ -90,7 +93,7 @@ function NavBar() {
               gap={4}
             >
               <IconButton aria-label="cart" onClick={() => navigate("/cart")}>
-                <Badge badgeContent={4} color="secondary">
+                <Badge badgeContent={CartItem.length} color="secondary">
                   <ShoppingCart sx={{color:"#ffffff"}} />
                 </Badge>
               </IconButton>

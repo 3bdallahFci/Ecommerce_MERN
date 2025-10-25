@@ -11,6 +11,8 @@ const AuthProvider: FC<PropsWithChildren> = ({ children }) => {
     localStorage.getItem("token")
   );
 
+  
+
   const login = (username: string, token: string) => {
     localStorage.setItem("username", username);
     localStorage.setItem("token", token);
