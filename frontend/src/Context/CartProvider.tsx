@@ -7,7 +7,7 @@ import { useAuth } from "./AuthContext";
 const CartProvider: FC<PropsWithChildren> = ({ children }) => {
   const { token } = useAuth();
   const [CartItem, setCartItem] = useState<CartItem[]>([]);
-  const [totalamount, setTotalamount] = useState<number>(0);
+  const [totalAmount, setTotalAmount] = useState<number>(0);
   const [error, setError] = useState<any>();
 
   useEffect(() => {
@@ -20,22 +20,32 @@ const CartProvider: FC<PropsWithChildren> = ({ children }) => {
           },
         });
 
+        if (!response.ok) {
+          setError(error || "Failed to fetch cart , please try again!");
+        }
         const cart = await response.json();
 
         const CartItemsMapped = cart.items.map(
-          ({ product, quantity }: { product: any; quantity: number }) => ({
+          ({
+            product,
+            quantity,
+            unitPrice,
+          }: {
+            product: any;
+            quantity: number;
+            unitPrice: number;
+          }) => ({
             productId: product,
             title: product.title,
             image: product.image,
             quantity,
-            unitPrice: product.unitPrice,
+            unitPrice,
           })
         );
-        if (!response.ok) {
-          setError(error || "Failed to fetch cart , please try again!");
-        }
-
+        console.log(CartItemsMapped);
+        
         setCartItem(CartItemsMapped);
+        setTotalAmount(cart.totalAmount);
       } catch (error) {
         setError(error || "Failed to fetch cart , please try again!");
       }
@@ -66,22 +76,30 @@ const CartProvider: FC<PropsWithChildren> = ({ children }) => {
       }
 
       const CartItemsMapped = cart.items.map(
-        ({ product, quantity }: { product: any; quantity: number }) => ({
+        ({
+          product,
+          quantity,
+          unitPrice,
+        }: {
+          product: any;
+          quantity: number;
+          unitPrice: number;
+        }) => ({
           productId: product,
           title: product.title,
           image: product.image,
           quantity,
-          unitPrice: product.unitPrice,
+          unitPrice,
         })
       );
       setCartItem([...CartItemsMapped]);
-      setTotalamount(cart.totalamount);
+      setTotalAmount(cart.totalAmount);
     } catch (error) {
       setError(error);
     }
   };
   return (
-    <CartContext.Provider value={{ CartItem, totalamount, addToCart }}>
+    <CartContext.Provider value={{ CartItem, totalAmount, addToCart }}>
       {children}
     </CartContext.Provider>
   );
