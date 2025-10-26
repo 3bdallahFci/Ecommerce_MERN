@@ -3,8 +3,15 @@ import { useEffect, useState } from "react";
 import { useCart } from "../Context/CartContext";
 
 const CartPage = () => {
-  const { CartItem, totalAmount } = useCart();
-  
+  const { CartItem, totalAmount,updateIteminCart,RemoveIteminCart } = useCart();
+  const handlequantity = (productId:string,quantity:number) => {
+    if(quantity <= 0) return
+    updateIteminCart(productId,quantity)
+  }
+  const handleRemove = (productId:string) =>
+  {
+    RemoveIteminCart(productId);
+  }
   return (
     <Container fixed sx={{ mt: 2 }}>
       <Typography variant="h3" sx={{textAlign:"center"}}>My Cart</Typography>
@@ -29,12 +36,12 @@ const CartPage = () => {
                 <Typography>
                   {i.quantity} x {i.unitPrice} EGP
                 </Typography>
-                <Button>Remove item</Button>
+                <Button onClick={() => handleRemove(i.productId)}>Remove item</Button>
               </Box>
             </Box>
             <ButtonGroup variant="contained">
-              <Button>+</Button>
-              <Button>-</Button>
+              <Button onClick={() => handlequantity(i.productId,i.quantity + 1)}>+</Button>
+              <Button onClick={() => handlequantity(i.productId,i.quantity - 1)}>-</Button>
             </ButtonGroup>
             </Box>
         ))}
