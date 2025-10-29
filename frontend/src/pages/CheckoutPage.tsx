@@ -9,11 +9,33 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "../Context/CartContext";
 import { useNavigate } from "react-router";
+import { BASE_URL } from "../constants/BaseUrl";
+import  { useAuth } from "../Context/AuthContext";
 
 const CheckoutPage = () => {
+  const {token} = useAuth()
   const addressRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { CartItem, totalAmount } = useCart();
+
+  const handlePayNow = async() => {
+    const address = addressRef.current?.value;
+
+    const response = await fetch(`${BASE_URL}/checkout`, {
+        body: JSON.stringify({
+          address
+        }),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization" : `Bearer ${token}`
+        },
+      });
+
+      if(!response.ok) return;
+
+      navigate('/orderSuccess')
+  }
   return (
     <Container fixed sx={{ mt: 2 }}>
       <Box
@@ -88,7 +110,7 @@ const CheckoutPage = () => {
           </Typography>
         </Box>
       </Box>
-      <Button variant="contained" fullWidth sx={{ mt: 2, mb: 3 }}>
+      <Button variant="contained" fullWidth sx={{ mt: 2, mb: 3 }} onClick={handlePayNow}>
         Pay Now
       </Button>
     </Container>
