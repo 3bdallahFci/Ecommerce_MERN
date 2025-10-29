@@ -8,6 +8,7 @@ import AuthProvider from './Context/AuthProvider'
 import CartPage from './pages/CartPage'
 import ProtectedRoute from './components/ProtectedRoute'
 import CartProvider from './Context/CartProvider'
+import CheckoutPage from './pages/CheckoutPage'
 
 function App() {
   
@@ -24,6 +25,7 @@ function App() {
           <Route path='/login' element={<LoginPage/>}/>
           <Route element={<ProtectedRoute/>}>
           <Route path='/cart' element={<CartPage/>}/>
+          <Route path='/checkout' element={<CheckoutPage/>}/>
           </Route>
         </Routes>
       </BrowserRouter>
