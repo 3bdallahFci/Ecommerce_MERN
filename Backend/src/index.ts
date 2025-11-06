@@ -20,6 +20,7 @@ app.use(cors());
 
 export interface ExtendRequest extends Request {
   user?: any;
+  admin?: any;
 }
 
 export const validateJWT = (
@@ -142,6 +143,21 @@ const login = async ({ email, password }: loginparams) => {
     return { data: "Login failed", statusCode: 500 };
   }
 };
+// admin database steup
+
+export interface IAdmin {
+  username: string;
+  email: string;
+  password: string;
+}
+
+const adminSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  email: { type: String, unique: true, required: true },
+  password: { type: String, required: true },
+});
+
+const adminModel = mongoose.model<IAdmin>("admin", adminSchema);
 
 // JWT generation
 const jwtGenerate = (data: any) => {
@@ -246,6 +262,9 @@ app.get("/product", async (req, res) => {
     res.send({ Error: error }).status(400);
   }
 });
+
+// add products by admin dashboard
+// app.post("/product",validateJWT)
 
 // handling cart feature
 
@@ -364,7 +383,10 @@ const addItemtoCart = async ({
     });
     cart.totalAmount += product.price * quantity;
     await cart.save();
-    return { data: await getActiveCartForUser({userId,populateProduct:true}), statusCode: 201 };
+    return {
+      data: await getActiveCartForUser({ userId, populateProduct: true }),
+      statusCode: 201,
+    };
   } catch (error) {
     return { data: "Failed to add item to cart", statusCode: 500 };
   }
@@ -403,7 +425,10 @@ const updateItemsInCart = async ({
       0
     );
     await cart.save();
-    return { data: await getActiveCartForUser({userId,populateProduct:true}), statusCode: 201 };
+    return {
+      data: await getActiveCartForUser({ userId, populateProduct: true }),
+      statusCode: 201,
+    };
   } catch (error) {
     return { data: "Failed to update cart", statusCode: 500 };
   }
@@ -433,7 +458,10 @@ const deleteItemFromCart = async ({
       0
     );
     await cart.save();
-    return { data: await getActiveCartForUser({userId,populateProduct:true}), statusCode: 200 };
+    return {
+      data: await getActiveCartForUser({ userId, populateProduct: true }),
+      statusCode: 200,
+    };
   } catch (error) {
     return { data: "Failed to delete item from cart", statusCode: 500 };
   }
@@ -450,7 +478,10 @@ const clearCart = async ({ userId }: clearCart) => {
     cart.items = [];
     cart.totalAmount = 0;
     await cart.save();
-    return { data: await getActiveCartForUser({userId,populateProduct:true}), statusCode: 200 };
+    return {
+      data: await getActiveCartForUser({ userId, populateProduct: true }),
+      statusCode: 200,
+    };
   } catch (error) {
     return { data: "Failed to clear cart", statusCode: 500 };
   }
@@ -600,6 +631,105 @@ app.post("/checkout", validateJWT, async (req: ExtendRequest, res) => {
   }
 });
 
+interface AdminJwtPayload extends jwt.JwtPayload {
+  id: string;
+  role: string;
+}
+
+export const validateAdmin = async (
+  req: ExtendRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // 1️⃣ Get token from headers
+    const authHeader = req.get("authorization");
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res
+        .status(401)
+        .json({ message: "Access denied, no token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ message: "Access denied, no token provided" });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_kEY || ""
+    ) as AdminJwtPayload;
+
+    // 3️⃣ Check if admin still exists
+    const admin = await adminModel.findById(decoded.id);
+    if (!admin) {
+      return res.status(403).json({ message: "Invalid or expired token" });
+    }
+
+    // 4️⃣ Attach admin info to request for next middleware
+    req.admin = admin;
+    next();
+  } catch (error) {
+    console.error("Admin verification failed:", error);
+    res.status(403).json({ message: "Token verification failed" });
+  }
+};
+
+app.post("/admin/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Find admin by email
+    const admin = await adminModel.findOne({ email });
+
+    if (!admin) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    // Compare entered password with hashed one
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    // Generate JWT token for admin
+    const token = jwt.sign({ id: admin._id }, process.env.JWT_KEY || "");
+
+    res.status(200).json({ message: "Login successful", token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.post("/product", validateAdmin, async (req, res) => {
+  try {
+    const { title, image, price, stock } = req.body;
+
+    if (!title || !price || !stock || !image) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const newProduct = new productModel({
+      title,
+      stock,
+      price,
+      image,
+    });
+
+    await newProduct.save();
+    res
+      .status(201)
+      .json({ message: "Product added successfully", product: newProduct });
+  } catch (err) {
+    console.error("Add product error:", err);
+    res.status(500).json({ message: "Server error while adding product" });
+  }
+});
 app.listen(port, () => {
   console.log(`server is running at: http://localhost:${port}`);
 });

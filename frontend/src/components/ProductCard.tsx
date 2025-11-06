@@ -24,8 +24,13 @@ export default function ProductCard({ _id, title, price, image }: props) {
           component="img"
           alt="green iguana"
           height="400"
-          width="400"
+          width=""
           image={image}
+          sx={{
+            objectFit: "contain", // keeps the full image visible
+            width: "100%",
+            backgroundColor: "#fff",
+          }}
         />
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">

@@ -28,8 +28,9 @@ const HomePage = () => {
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-        gap: 2,
+        gridTemplateColumns: "repeat(3,1fr)",
+        gap: 5,
+        padding:"20px"
       }}
       mt={3}
     >

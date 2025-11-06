@@ -8,12 +8,13 @@
   </head>
   <body style="
       background-image: url('./public/10607573.jpg');
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      height: 100vh;
-      width: 100%;
-      margin: 0;
+      background-size: cover;       /* ✅ keeps full coverage without stretching */
+  background-repeat: no-repeat; /* ✅ prevents tiling */
+  background-position: center;  /* ✅ centers image */
+  background-attachment: fixed; /* ✅ keeps it in place when scrolling */
+  min-height: 100vh;            /* ensures full height */
+  margin: 0;
+  padding: 0;
     ">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

@@ -10,6 +10,10 @@ import ProtectedRoute from './components/ProtectedRoute'
 import CartProvider from './Context/CartProvider'
 import CheckoutPage from './pages/CheckoutPage'
 import OrderSuccessPage from './pages/OrderSuccessPage'
+import AdminDashboard from './pages/AdminDashboard'
+import AdminLogin from './pages/AdminLogin'
+import ProtectedAdmin from './components/ProtectedAdmin'
+import { AdminAuthProvider } from './Context/AdminContext'
 
 function App() {
   
@@ -17,6 +21,7 @@ function App() {
 
   return (
     <AuthProvider>
+      <AdminAuthProvider>
       <CartProvider>
       <BrowserRouter>
       <NavBar />
@@ -24,6 +29,10 @@ function App() {
           <Route path="/" element={<HomePage />}/>
           <Route path='/register' element={<RegisterPage/>}/>
           <Route path='/login' element={<LoginPage/>}/>
+          <Route path='/Adminlogin' element={<AdminLogin/>}/>
+          <Route element={<ProtectedAdmin/>}>
+          <Route path='/AdminDashboard' element= {<AdminDashboard/>}/>
+          </Route>
           <Route element={<ProtectedRoute/>}>
           <Route path='/cart' element={<CartPage/>}/>
           <Route path='/checkout' element={<CheckoutPage/>}/>
@@ -32,6 +41,7 @@ function App() {
         </Routes>
       </BrowserRouter>
       </CartProvider>
+      </AdminAuthProvider>
     </AuthProvider>
   )
 }
